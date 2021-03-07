@@ -1,0 +1,52 @@
+Task1:
+
+adress: 172.30.1.33
+netmask: 255.255.224.0
+______________________
+
+network adress: 172.30.0.0/19	10101100.00011110.00000000.00000000
+broadcast adress: 172.30.31.255
+min adress: 172.30.0.1
+max adress: 172.30.31.254
+______________________
+
+Task2:
+
+adress: 212.100.54.0
+netmask: 255.255.255.0
+______________________
+
+first subnet: 212.100.54.0/30
+netmask: 255.255.255.252
+adresses: 212.100.54.1-2
+broadcast: 212.100.54.3
+
+second subnet: 212.100.54.4/30
+netmask: 255.255.255.252
+adresses: 212.100.54.5-6
+broadcast: 212.100.54.7
+
+third subnet: 212.100.54.8/30
+netmask: 255.255.255.252
+adresses: 212.100.54.9-10
+broadcast: 212.100.54.11
+
+forth subnet: 212.100.54.12/30
+netmask: 255.255.255.252
+adresses: 212.100.54.13-14
+broadcast: 212.100.54.15
+
+fifth subnet: 212.100.54.16/28
+netmask: 255.255.255.240
+adresses: 212.100.54.17-30
+broadcast: 212.100.54.31
+
+sixth subnet: 212.100.54.32/27
+netmask: 255.255.255.224
+adresses: 212.100.54.33-62
+broadcast: 212.100.54.63
+
+seventh subnet: 212.100.54.64/26
+netmask: 255.255.255.192
+adresses: 212.100.54.65-126
+broadcast: 212.100.54.127
