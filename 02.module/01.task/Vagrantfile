@@ -1,0 +1,25 @@
+# SSH Keys Variables 
+PUB_KEY_PATH = "~/.ssh/id_rsa.pub"
+PUB_KEY_PATH_DEST = "/home/vagrant/.ssh/id_rsa.pub"
+
+Vagrant.configure("2") do |config|
+  config.vm.define "vagrant" do |vagrant|                                                   # Box Settings
+    vagrant.vm.box = "generic/ubuntu1804"
+    vagrant.vm.hostname = "ubuntu-1804-01"
+    vagrant.vm.box_check_update = false
+    vagrant.vm.provider "virtualbox" do |v|                                                 # Provider Settings
+      v.name = "ubuntu-1804-01"
+      v.gui = false
+      v.memory = 512
+      v.cpus = 1
+    end
+    vagrant.vm.synced_folder ".", "/vagrant"                                                # Shared Folder settings
+    vagrant.vm.network :public_network, ip: "192.168.10.21", bridge: "wlp1s0"               # Network Settings
+    vagrant.vm.provision "file", source: PUB_KEY_PATH, destination: PUB_KEY_PATH_DEST       # Provision Settings
+    vagrant.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get install -y git curl wget tree
+    cat /home/vagrant/.ssh/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
+    SHELL
+  end
+end
