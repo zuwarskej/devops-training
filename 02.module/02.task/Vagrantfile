@@ -1,0 +1,58 @@
+PUB_KEY_PATH = "~/.ssh/id_rsa.pub"                                                           # SSH Keys Variables 
+PUB_KEY_PATH_DEST = "/tmp/id_rsa.pub"
+SSH_CONF_PATH = "/tmp/config"                                                                # SSH Config
+
+Vagrant.configure("2") do |config|
+  config.ssh.forward_agent = true                                                            # SSH Forwarding
+  config.ssh.insert_key = false                                                              # Use One SSH key fo all VMs
+  config.vm.define "vagrant1" do |vagrant1|                                                  # Box Settings
+    vagrant1.vm.box = "generic/ubuntu1804"
+    vagrant1.vm.hostname = "ubuntu-1804-02"
+    vagrant1.vm.box_check_update = false
+    vagrant1.vm.provider "virtualbox" do |v|                                                 # Provider Settings
+      v.name = "ubuntu-1804-02"
+      v.gui = false
+      v.memory = 512
+      v.cpus = 1
+    end
+    vagrant1.vm.synced_folder ".", "/vagrant"                                                # Shared Folder settings
+    vagrant1.vm.network :public_network, ip: "192.168.10.22", bridge: "wlp1s0"               # Network Settings
+    vagrant1.vm.provision "file", source: PUB_KEY_PATH, destination: PUB_KEY_PATH_DEST       # Provision Settings
+    vagrant1.vm.provision "file", source: "config", destination: SSH_CONF_PATH
+    vagrant1.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get install -y git curl wget tree
+    cat /tmp/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
+    mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    mv /tmp/config /root/.ssh/config
+    chown -R root:root /root/.ssh/config
+    systemctl restart sshd
+    SHELL
+    vagrant1.vm.provision "shell", path: "github.sh"
+  end
+  config.vm.define "vagrant2" do |vagrant2|                                                  # Box Settings
+    vagrant2.vm.box = "generic/ubuntu1804"
+    vagrant2.vm.hostname = "ubuntu-1804-03"
+    vagrant2.vm.box_check_update = false
+    vagrant2.vm.provider "virtualbox" do |v|                                                 # Provider Settings
+      v.name = "ubuntu-1804-03"
+      v.gui = false
+      v.memory = 512
+      v.cpus = 1
+    end
+    vagrant2.vm.synced_folder ".", "/vagrant"                                                # Shared Folder settings
+    vagrant2.vm.network :public_network, ip: "192.168.10.23", bridge: "wlp1s0"               # Network Settings
+    vagrant2.vm.provision "file", source: PUB_KEY_PATH, destination: PUB_KEY_PATH_DEST       # Provision Settings
+    vagrant2.vm.provision "file", source: "config", destination: SSH_CONF_PATH
+    vagrant2.vm.provision "shell", inline: <<-SHELL
+    apt-get update
+    apt-get install -y git curl wget tree
+    cat /tmp/id_rsa.pub >> /home/vagrant/.ssh/authorized_keys
+    mkdir -p ~/.ssh && chmod 700 ~/.ssh
+    mv /tmp/config /root/.ssh/config
+    chown -R root:root /root/.ssh/config
+    systemctl restart sshd
+    SHELL
+    vagrant2.vm.provision "shell", path: "github.sh"
+  end
+end
