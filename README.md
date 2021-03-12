@@ -1,1 +1,0 @@
-## Training course for DevOps
