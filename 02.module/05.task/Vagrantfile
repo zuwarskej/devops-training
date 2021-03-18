@@ -1,0 +1,29 @@
+IMAGE_BOX = "zuwarskej/debian-10"
+N = 1
+
+class Backend
+    def initialize(i)
+        @name = "node-#{i}"
+        @ip = "172.16.10.#{10 + i}"
+    end
+    
+    def configure(config)
+        config.vm.define @name, primary: @primary do |v|
+            v.vm.hostname = @name
+            v.vm.network "private_network", ip: @ip
+        end
+    end
+end
+
+Vagrant.configure("2") do |config|
+    config.vm.box = IMAGE_BOX
+    config.vm.provider :virtualbox do |v|
+        v.gui = false
+        v.memory = 512
+        v.cpus = 1
+    end
+    (1..N).each do |i|
+        cfg = Backend.new(i)
+        cfg.configure(config)
+    end
+end
