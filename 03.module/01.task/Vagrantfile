@@ -1,0 +1,64 @@
+PRIVATE_KEY_PATH = "~/.ssh/id_rsa"
+PRIVATE_KEY_PATH_DEST = "~/.ssh/id_rsa"
+PUB_KEY_PATH = "~/.ssh/id_rsa.pub"
+PUB_KEY_PATH_DEST = "~/.ssh/authorized_keys"
+IMAGE_BOX = "zuwarskej/debian-10"
+VM_PROVIDER = "virtualbox"
+ENV['VAGRANT_NO_PARALLEL'] = 'yes'
+
+Vagrant.configure("2") do |config|
+    config.ssh.insert_key = false
+    config.vagrant.plugins = "vagrant-hostmanager"
+    config.hostmanager.enabled = true
+    config.hostmanager.manage_host = true
+    config.hostmanager.ignore_private_ip = false
+    config.hostmanager.include_offline = true
+
+    config.vm.define "node-1" do |node|
+        node.vm.box = IMAGE_BOX
+        node.vm.hostname = "node-1"
+        node.vm.box_check_update = false
+        node.vm.disk :disk, size: "65GB", primary: true
+        node.vm.disk :disk, size: "20GB", name: "extra_storage_1"
+        node.vm.disk :disk, size: "20GB", name: "extra_storage_2"
+        node.vm.provider VM_PROVIDER do |v|
+            v.name = "node-1"
+            v.gui = false
+            v.memory = 512
+            v.cpus = 1
+        end
+        node.vm.synced_folder ".", "/vagrant"
+        node.vm.network :private_network, ip: "172.16.10.10"
+        node.vm.provision :file, source: PUB_KEY_PATH, destination: PUB_KEY_PATH_DEST
+        node.vm.provision :file, source: PRIVATE_KEY_PATH, destination: PRIVATE_KEY_PATH_DEST
+        node.vm.provision :shell, inline: "apt-get update > /dev/null 2>&1"
+        node.vm.provision :shell, path: "bootstrap_lvm.sh"
+        node.vm.provision :shell, path: "bootstrap_puma.sh"
+        node.vm.provision :hostmanager
+    end
+
+    config.vm.define "node-2" do |node|
+        node.vm.box = IMAGE_BOX
+        node.vm.hostname = "node-2"
+        node.vm.box_check_update = false
+        node.vm.disk :disk, size: "65GB", primary: true
+        node.vm.disk :disk, size: "5GB", name: "extra_storage_1"
+        node.vm.disk :disk, size: "5GB", name: "extra-storage_2"
+        node.vm.disk :disk, size: "5GB", name: "extra-storage_3"
+        node.vm.disk :disk, size: "5GB", name: "extra-storage_4"
+        node.vm.disk :disk, size: "5GB", name: "extra-storage_5"
+        node.vm.provider VM_PROVIDER do |v|
+            v.name = "node-2"
+            v.gui = false
+            v.memory = 512
+            v.cpus = 1
+        end
+        node.vm.synced_folder ".", "/vagrant"
+        node.vm.network :private_network, ip: "172.16.10.11"
+        node.vm.provision :file, source: PUB_KEY_PATH, destination: PUB_KEY_PATH_DEST
+        node.vm.provision :file, source: PRIVATE_KEY_PATH, destination: PRIVATE_KEY_PATH_DEST
+        node.vm.provision :shell, inline: "apt-get update > /dev/null 2>&1"
+        node.vm.provision :shell, path: "bootstrap_mdadm.sh"
+        node.vm.provision :hostmanager
+    end
+end
