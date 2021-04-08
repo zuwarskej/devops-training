@@ -1,0 +1,37 @@
+PRIVATE_KEY_PATH = "~/.ssh/id_rsa"
+PRIVATE_KEY_PATH_DEST = "~/.ssh/id_rsa"
+PUB_KEY_PATH = "~/.ssh/id_rsa.pub"
+PUB_KEY_PATH_DEST = "~/.ssh/authorized_keys"
+IMAGE_BOX = "zuwarskej/debian-10"
+VM_PROVIDER = "virtualbox"
+N=2
+
+Vagrant.configure("2") do |config|
+    (1..N).each do |i|
+        config.ssh.insert_key = false
+        config.vagrant.plugins = "vagrant-hostmanager"
+        config.hostmanager.enabled = true
+        config.hostmanager.manage_host = true
+        config.hostmanager.ignore_private_ip = false
+        config.hostmanager.include_offline = true
+    
+        config.vm.define "node-#{i}" do |node|
+            node.vm.box = IMAGE_BOX
+            node.vm.hostname = "node-#{i}"
+            node.vm.box_check_update = false
+            node.vm.provider VM_PROVIDER do |v|
+                v.name = "node-#{i}"
+                v.gui = false
+                v.memory = 512
+                v.cpus = 1
+            end
+            node.vm.synced_folder ".", "/vagrant"
+            node.vm.network :private_network, ip: "172.16.10.#{10+i}"
+            node.vm.provision :file, source: PUB_KEY_PATH, destination: PUB_KEY_PATH_DEST
+            node.vm.provision :file, source: PRIVATE_KEY_PATH, destination: PRIVATE_KEY_PATH_DEST
+            node.vm.provision :shell, inline: "apt-get update >/dev/null 2>&1"
+            node.vm.provision :shell, path: "bootstrap.sh"
+            node.vm.provision :hostmanager
+        end
+    end
+end
