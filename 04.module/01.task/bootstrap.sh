@@ -54,7 +54,9 @@ PasswordAuthentication no
 PermitEmptyPasswords no
 PermitRootLogin no
 AllowUsers vagrant
-ClientAliveInterval 300
+TCPKeepAlive yes
+ClientAliveInterval 1m
+ClientAliveCountMax 5
 MaxAuthTries 3
 MaxSessions 5
 PrintLastLog no
@@ -94,7 +96,7 @@ alias update='sudo apt update && sudo apt upgrade -yqq'
 alias autoremove='sudo apt autoremove -yqq && sudo apt autoclean'
 
 # Generate random password (Can be useful for SSH passphrase)
-genpasswd() {
+genpasswd () {
     local l=$1
     [ "$l" == "" ] && l=20
     tr -dc A-Za-z0-9_ < /dev/urandom | head -c ${l} | xargs
